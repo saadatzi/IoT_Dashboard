@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT.Dashboard.Web", "IoT.Dashboard.Web\IoT.Dashboard.Web.csproj", "{B8E15EA1-2C29-4377-A073-99E667AC5171}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT.Dashboard.ServiceDefaults", "IoT.Dashboard.ServiceDefaults\IoT.Dashboard.ServiceDefaults.csproj", "{9E8E070B-BC5A-4898-B62D-CF4883D1CDB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT.Dashboard.AppHost", "IoT.Dashboard.AppHost\IoT.Dashboard.AppHost.csproj", "{471D5982-8284-4814-89BD-E014C3CDF78A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT.Dashboard.SensorDataAPI", "IoT.Dashboard.SensorDataAPI\IoT.Dashboard.SensorDataAPI.csproj", "{1AEBC391-0B9E-4EA7-A1A0-5C58E183E345}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8E15EA1-2C29-4377-A073-99E667AC5171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8E15EA1-2C29-4377-A073-99E667AC5171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8E15EA1-2C29-4377-A073-99E667AC5171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8E15EA1-2C29-4377-A073-99E667AC5171}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E8E070B-BC5A-4898-B62D-CF4883D1CDB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E8E070B-BC5A-4898-B62D-CF4883D1CDB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E8E070B-BC5A-4898-B62D-CF4883D1CDB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E8E070B-BC5A-4898-B62D-CF4883D1CDB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{471D5982-8284-4814-89BD-E014C3CDF78A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{471D5982-8284-4814-89BD-E014C3CDF78A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{471D5982-8284-4814-89BD-E014C3CDF78A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{471D5982-8284-4814-89BD-E014C3CDF78A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AEBC391-0B9E-4EA7-A1A0-5C58E183E345}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AEBC391-0B9E-4EA7-A1A0-5C58E183E345}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AEBC391-0B9E-4EA7-A1A0-5C58E183E345}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AEBC391-0B9E-4EA7-A1A0-5C58E183E345}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
