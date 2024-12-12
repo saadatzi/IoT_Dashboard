@@ -12,6 +12,10 @@ builder.Services.AddSingleton<IInfluxDBClient, InfluxDBClient>(sp =>
     return new InfluxDBClient(settings.Url, settings.Token);
 });
 
+// Register hosted service
+builder.Services.AddHostedService<DataCollectionService>();
+
+builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
