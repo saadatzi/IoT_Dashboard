@@ -3,6 +3,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
+builder.Services.Configure<InfluxDbSettings>(builder.Configuration.GetSection("InfluxDb"));
+
+// Register InfluxDBClient
+builder.Services.AddSingleton<IInfluxDBClient, InfluxDBClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<InfluxDbSettings>>().Value;
+    return new InfluxDBClient(settings.Url, settings.Token);
+});
+
+
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
