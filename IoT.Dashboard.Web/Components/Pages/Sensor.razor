@@ -1,0 +1,262 @@
+﻿@page "/sensor"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.SignalR.Client
+@using IoT.Dashboard.Web.Measurements
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sensors Data</PageTitle>
+
+<h1>Sensors Data</h1>
+
+<div class="chart-container">
+    <h3>Temperature</h3>
+    <canvas id="temperatureChart"></canvas>
+</div>
+<div class="chart-container">
+    <h3>Pressure</h3>
+    <canvas id="pressureChart"></canvas>
+</div>
+<div class="chart-container">
+    <h3>Humidity</h3>
+    <canvas id="humidityChart"></canvas>
+</div>
+<div>
+    <p>Temperature: @sensorData.Temperature?.Value</p>
+    <p>Pressure: @sensorData.Pressure?.Value</p>
+    <p>Humidity: @sensorData.Humidity?.Value</p>
+</div>
+
+@code {
+    private HubConnection? hubConnection;
+    private Measurements sensorData = new();
+    private List<(DateTime Time, double? Temperature)> temperatureData = new();
+    private List<(DateTime Time, double? Pressure)> pressureData = new();
+    private List<(DateTime Time, double? Humidity)> humidityData = new();
+    private IJSObjectReference? chartJsModule;
+    private IJSObjectReference? temperatureChart;
+    private IJSObjectReference? pressureChart;
+    private IJSObjectReference? humidityChart;
+    private bool firstRender = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5364/sensorHub")
+            .Build();
+
+        hubConnection.Closed += async (error) =>
+        {
+            Console.WriteLine("Hub connection closed. Attempting to reconnect...");
+            await Task.Delay(3000);
+            await hubConnection.StartAsync();
+        };
+
+        hubConnection.On<Measurements>("ReceiveSensorData", async (Measurements data) =>
+        {
+            sensorData = data;
+
+            if (sensorData is not null)
+            {
+                temperatureData.Add((DateTime.Now, data.Temperature?.Value));
+                pressureData.Add((DateTime.Now, data.Pressure?.Value));
+                humidityData.Add((DateTime.Now, data.Humidity?.Value));
+                await UpdateChart(temperatureChart, temperatureData);
+                await UpdateChart(pressureChart, pressureData);
+                await UpdateChart(humidityChart, humidityData);
+            }
+
+            if (temperatureData.Count > 15)
+            {
+                temperatureData.RemoveAt(0);
+                pressureData.RemoveAt(0);
+                humidityData.RemoveAt(0);
+            }
+
+            Console.WriteLine("StateHasChanged invoked.");
+            await InvokeAsync(StateHasChanged);
+        });
+        await hubConnection.StartAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool fr)
+    {
+        if (fr)
+        {
+            chartJsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./chart.js");
+            await CreateChart();
+            firstRender = false;
+        }
+    }
+
+    private async Task CreateChart()
+    {
+        await CreateTemperatureChart();
+        await CreatePressureChart();
+        await CreateHumidityChart();
+    }
+    private async Task CreateTemperatureChart()
+    {
+        var config = new
+        {
+            type = "line",
+            data = new
+            {
+                labels = temperatureData.Select(x => x.Time.ToString("HH:mm:ss")).ToArray(),
+                datasets = new[]
+                {
+                    new {
+                        label = "Temperature",
+                        backgroundColor = "rgb(255, 99, 132)",
+                        borderColor = "rgb(255, 99, 132)",
+                        data = temperatureData.Select(x => x.Temperature).ToArray(),
+                        tension = 0.1
+                    }
+                }
+            },
+            options = new
+            {
+                responsive = true,
+                maintainAspectRatio = false,
+                animation = new { duration = 50 },
+                scales = new
+                {
+                    x = new
+                    {
+                        display = true,
+                        ticks = new
+                        {
+                            autoSkip = true, 
+                            maxTicksLimit = 10
+                        }
+                    },
+                    y = new
+                    {
+                        display = true
+                    }
+                }
+            }
+        };
+        temperatureChart = await chartJsModule!.InvokeAsync<IJSObjectReference>("createChart", "temperatureChart", config);
+    }
+
+    private async Task CreatePressureChart()
+    {
+        var config = new
+        {
+            type = "line",
+            data = new
+            {
+                labels = pressureData.Select(x => x.Time.ToString("HH:mm:ss")).ToArray(),
+                datasets = new[]
+                {
+                    new {
+                        label = "Pressure",
+                        backgroundColor = "rgb(54, 162, 235)",
+                        borderColor = "rgb(54, 162, 235)",
+                        data = pressureData.Select(x => x.Pressure).ToArray(),
+                        tension = 0.1
+                    }
+                }
+            },
+            options = new
+            {
+                maintainAspectRatio = false,
+                animation = new { duration = 50 },
+                scales = new
+                {
+                    x = new
+                    {
+                        display = true,
+                        ticks = new
+                        {
+                            autoSkip = true, 
+                            maxTicksLimit = 10
+                        }
+                    },
+                    y = new
+                    {
+                        display = true
+                    }
+                }
+            }
+        };
+        pressureChart= await chartJsModule!.InvokeAsync<IJSObjectReference>("createChart", "pressureChart", config);
+    }
+    private async Task CreateHumidityChart()
+    {
+        var config = new
+        {
+            type = "line",
+            data = new
+            {
+                labels = humidityData.Select(x => x.Time.ToString("HH:mm:ss")).ToArray(),
+                datasets = new[]
+                {
+                    new {
+                        label = "Humidity",
+                        backgroundColor = "rgb(75, 192, 192)",
+                        borderColor = "rgb(75, 192, 192)",
+                        data = humidityData.Select(x => x.Humidity).ToArray(),
+                        tension = 0.1
+                    }
+                }
+            },
+            options = new
+            {
+                maintainAspectRatio = false,
+                animation = new { duration = 50 },
+                scales = new
+                {
+                    x = new
+                    {
+                        display = true,
+                        ticks = new
+                        {
+                            autoSkip = true, 
+                            maxTicksLimit = 10
+                        }
+                    },
+                    y = new
+                    {
+                        display = true
+                    }
+                }
+            }
+        };
+        humidityChart = await chartJsModule!.InvokeAsync<IJSObjectReference>("createChart", "humidityChart", config);
+    }
+    private async Task UpdateChart(IJSObjectReference? chart, List<(DateTime Time, double? Temperature)> sensorData)
+    {
+        if(chart != null)
+        {
+            var data = new
+            {
+                labels = sensorData.Select(x=> x.Time.ToString("HH:mm:ss")).ToArray(),
+                datasets = new[]
+                {
+                    new 
+                    {
+                        data = sensorData.Select(x=> x.Temperature).ToArray()
+                    }
+                }
+            };
+            await chartJsModule!.InvokeVoidAsync("updateChart", chart, data);
+        }
+    }
+
+
+    public void Dispose()
+    {
+        if(chartJsModule != null)
+        {
+            chartJsModule.DisposeAsync();
+        }
+
+        if (hubConnection is not null)
+        {
+            hubConnection?.DisposeAsync();
+            Console.WriteLine("Hub connection disposed.");
+        }
+    }
+}
