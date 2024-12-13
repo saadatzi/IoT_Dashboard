@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0" />
+    <PackageReference Include="Blazorise" Version="1.7.1" />
+    <PackageReference Include="Blazorise.Charts" Version="1.7.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
