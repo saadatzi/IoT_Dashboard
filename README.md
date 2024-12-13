@@ -2,7 +2,7 @@
 
 ## Description
 
-This project is designed to collect sensor data (temperature, pressure, moisture), persist it in a time series database (InfluxDB), and display real-time updates on a Blazor dashboard. Additionally, it includes a BI dashboard to show cumulative cost metrics.
+This project is designed to collect sensor data (temperature, pressure, humidity), persist it in a time series database (InfluxDB), and display real-time updates on a Blazor dashboard.
 
 ## Table of Contents
 
@@ -100,10 +100,6 @@ This project is designed to collect sensor data (temperature, pressure, moisture
 - **Real-Time Dashboard**
 
   The Blazor dashboard displays real-time sensor data using SignalR.
-
-- **BI Dashboard**
-
-  The BI dashboard shows cumulative cost metrics based on the sensor data.
 
 ## Technologies Used
 
