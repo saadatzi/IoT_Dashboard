@@ -1,59 +1,74 @@
-namespace IoT.Dashboard.AppHost;
+using IoT.Dashboard.SensorDataAPI.Measurements;
+
+namespace IoT.Dashboard.SensorDataAPI;
 
 public class DataCollectionService(
     ILogger<DataCollectionService> logger,
     IInfluxDBClient influxDBClient,
-    IOptions<InfluxDbSettings> influxDbSettings) : BackgroundService()
+    IOptions<InfluxDbSettings> influxDbSettings,
+    IHubContext<SensorHub> hubContext
+    ) : BackgroundService()
 {
     private readonly ILogger<DataCollectionService> logger = logger;
     private readonly IInfluxDBClient influxDBClient = influxDBClient;
     private readonly IOptions<InfluxDbSettings> influxDbSettings = influxDbSettings;
+    private readonly IHubContext<SensorHub>? hubContext = hubContext;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while(!stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
             // Collect the data from sensors
             double temperature = GetTemperature();
             double pressure = GetPressure();
             double moisture = GetMoisture();
 
+            var measurements = CreateMeasuremens(temperature, pressure, moisture);
+
             // Persist data into InfluxDB
-            await PersistDataToInfluxDB(temperature, pressure, moisture);
+            await PersistDataToInfluxDB(measurements);
+
+            await hubContext!.Clients.All.SendAsync("ReceiveSensorData", measurements, cancellationToken: stoppingToken);
 
             await Task.Delay(1000, stoppingToken);
         }
     }
 
-    private async Task PersistDataToInfluxDB(double temperatureValue, double pressureValue, double moistureValue)
+    private static Msurements CreateMeasuremens(double temperatureValue, double pressureValue, double humidityValue)
     {
-        var writeApiAsync = influxDBClient.GetWriteApiAsync();
-        var temperature = new Temperature
+        var temperaturePoint = new Temperature
         {
             Location = "floor",
             Value = temperatureValue,
             Time = DateTime.UtcNow
         };
 
-        var pressure = new Pressure
+        var pressurePoint = new Pressure
         {
             Location = "floor",
             Value = pressureValue,
             Time = DateTime.UtcNow
         };
 
-        var moisture = new Humidity
+        var humidityPoint = new Humidity
         {
             Location = "floor",
-            Value = moistureValue,
+            Value = humidityValue,
             Time = DateTime.UtcNow
         };
 
+        return new Msurements { Temperature = temperaturePoint, Pressure = pressurePoint, Humidity = humidityPoint };
+    }
+
+    private async Task PersistDataToInfluxDB(Msurements measurements)
+    {
+        var writeApiAsync = influxDBClient.GetWriteApiAsync();
+
         try
         {
-            await writeApiAsync.WriteMeasurementAsync(temperature, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
-            await writeApiAsync.WriteMeasurementAsync(pressure, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
-            await writeApiAsync.WriteMeasurementAsync(moisture, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
+            await writeApiAsync.WriteMeasurementAsync(measurements.Temperature, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
+            await writeApiAsync.WriteMeasurementAsync(measurements.Pressure, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
+            await writeApiAsync.WriteMeasurementAsync(measurements.Humidity, WritePrecision.Ns, influxDbSettings.Value.Bucket, influxDbSettings.Value.Organization);
         }
         catch (Exception ex)
         {
